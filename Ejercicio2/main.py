@@ -3,10 +3,7 @@ from sqlalchemy import create_engine, MetaData, Table, Column, String, Date, NUM
 import pandas as pd
 from bs4 import BeautifulSoup
 import os
-
 import requests
-from bs4 import BeautifulSoup
-import pandas as pd
 import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -14,25 +11,31 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 def extract_dolar_bcra():
     print("Extrayendo cotizaciones del BCRA...")
 
-    # Paso 1: URL del formulario
-    url = "https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables_datos.asp"
+    url = "https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables_datos.asp?serie=7927"
+    session = requests.Session()
 
-    # Paso 2: Datos que se enviarían desde el formulario
+    # GET inicial para obtener cookies y tokens si hubiera
+    r_get = session.get(url)
+    if r_get.status_code != 200:
+        raise Exception(f"Error en GET inicial: {r_get.status_code}")
+
+    # POST con las fechas y botón
     payload = {
-        "serie": "7927",
         "fecha_desde": "01/06/2010",  # formato día/mes/año
         "fecha_hasta": "04/08/2025",
         "B1": "Consultar"
     }
+    r_post = session.post(url, data=payload)
+    if r_post.status_code != 200:
+        raise Exception(f"Error en POST: {r_post.status_code}")
 
-    # Paso 3: Hacemos el POST
-    response = requests.post(url, data=payload)
-
-    # Paso 4: Parseamos el HTML para extraer la tabla
-    soup = BeautifulSoup(response.content, "html.parser")
+    soup = BeautifulSoup(r_post.content, "html.parser")
     table = soup.find("table", {"class": "table"})
+    if not table:
+        print("No se encontró la tabla en la respuesta. Revisa el HTML:")
+        print(r_post.text[:1000])
+        raise Exception("Tabla no encontrada")
 
-    # Paso 5: Convertimos a DataFrame
     data = []
     for row in table.find_all("tr"):
         cols = row.find_all("td")
@@ -46,6 +49,7 @@ def extract_dolar_bcra():
 
     df = pd.DataFrame(data)
     df["fecha"] = pd.to_datetime(df["fecha"], dayfirst=True)
+    print(f"Filas extraídas: {len(df)}")
     print(df.head())
     return df
 
@@ -64,7 +68,6 @@ def load_to_postgres(df):
     )
 
     metadata.create_all(engine)
-    print('pase5')
     df["moneda"] = "Dólar"
     df["fuente"] = "BCRA"
     df = df[["fecha", "moneda", "tipo_cambio", "fuente"]]
@@ -85,7 +88,7 @@ def load_to_postgres(df):
         print(f"{len(df)} filas insertadas en 'cotizaciones'.")
     else:
         print("No hay nuevas filas para insertar.")
-    print('pase6')
+    print('Carga finalizada.')
 
 if __name__ == "__main__":
     try:
