@@ -1,7 +1,6 @@
 # Ejercicio 1 - Replicación de base de datos
 El objetivo principal de este ejercicio es replicar datos de una base PostgreSQL local a una base en la nube (Render) mediante un pipeline ETL automatizado.  
 
-
 ### Esquema de la base de datos
 
 - `DimDate`: tabla de fechas con columnas para año, mes, día, etc.  
@@ -21,8 +20,7 @@ El esquema se crea por única vez en Render con `schema.py`.
 
 - `extract.py`: se conecta a la base local y extrae los datos de las tablas a pandas DataFrames.  
 - `load.py`: realiza el upsert (insert/update) en la base destino en Render para mantener la base espejo sincronizada.  
-- `main.py`: orquesta la extracción y carga.  
-
+- `main.py`: orquesta la extracción y carga de datos.  
 
 ### Cómo correr localmente
 

@@ -5,4 +5,12 @@ Contenido
 
 ### Ingesta incremental 
 
-El script `main.py` tiene dos funciones: extract_dolar_bcra y load_to_postgres. La función extract_dolar_brca navega a la página del BCRA con cotizaciones del dólar. Extrae datos desde la fecha 2010-06-01 hasta la fecha 2025-08-04. Limpia y procesa los datos en un DataFrame de pandas. La función load_to_postgres carga los datos nuevos incrementalmente en la tabla cotizaciones en PostgreSQL.
+El script `main.py` tiene dos funciones: extract_dolar_bcra y load_to_postgres. La función extract_dolar_brca navega a la página del BCRA con cotizaciones del dólar. Extrae datos desde la fecha 2010-06-01 hasta la fecha 2025-08-04. Limpia y procesa los datos en un DataFrame de pandas. La función load_to_postgres carga los datos nuevos en PostgreSQL. Si no hay datos previos (en Render Postgres) ingesta todos los valores de la tabla y si ya hay datos solo incresa los posteriores a la última fecha.
+
+### Automatización
+
+1. Crear esquema en Render con `python3 schema.py` por unica vez.  
+2. Ejecutar pipeline con `python3 main.py` y/o automatizar con Github actions.
+
+### Automatización
+Acceso a través de 
