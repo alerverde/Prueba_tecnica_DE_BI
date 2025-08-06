@@ -12,13 +12,6 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import os
 
-options = Options()
-options.add_argument('--headless')
-options.add_argument('--no-sandbox')
-options.add_argument('--disable-dev-shm-usage')
-
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-
 def extract_dolar_bcra():
     print("Extrayendo cotizaciones del BCRA...")
 
@@ -34,7 +27,7 @@ def extract_dolar_bcra():
         url = "https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables_datos.asp?serie=7927"
         driver.get(url)
 
-        WebDriverWait(driver, 15).until(
+        WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.NAME, "fecha_desde"))
         )
         print('pase1')
@@ -49,7 +42,7 @@ def extract_dolar_bcra():
         consultar_btn = driver.find_element(By.NAME, "B1")
         consultar_btn.click()
         print('pase2')
-        WebDriverWait(driver, 15).until(
+        WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CLASS_NAME, "table"))
         )
 
