@@ -11,6 +11,7 @@ from sqlalchemy import create_engine, MetaData, Table, Column, String, Date, NUM
 import pandas as pd
 from bs4 import BeautifulSoup
 import os
+import time
 
 def extract_dolar_bcra():
     print("Extrayendo cotizaciones del BCRA...")
