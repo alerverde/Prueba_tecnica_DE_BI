@@ -1,84 +1,53 @@
 # main.py
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
 from sqlalchemy import create_engine, MetaData, Table, Column, String, Date, NUMERIC, select, func
 import pandas as pd
 from bs4 import BeautifulSoup
 import os
-import time
+
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def extract_dolar_bcra():
     print("Extrayendo cotizaciones del BCRA...")
 
-    # Configurar Chrome headless
-    options = Options()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
-    options.add_argument(
-        "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
-    )
+    # Paso 1: URL del formulario
+    url = "https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables_datos.asp"
 
-    # Inicializar el driver
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+    # Paso 2: Datos que se enviarían desde el formulario
+    payload = {
+        "serie": "7927",
+        "fecha_desde": "01/06/2010",  # formato día/mes/año
+        "fecha_hasta": "04/08/2025",
+        "B1": "Consultar"
+    }
 
-    try:
-        url = "https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables_datos.asp?serie=7927"
-        driver.get(url)
+    # Paso 3: Hacemos el POST
+    response = requests.post(url, data=payload)
 
-        WebDriverWait(driver, 30).until(
-            EC.presence_of_element_located((By.NAME, "fecha_desde"))
-        )
-        print('pase1')
-        fecha_desde = driver.find_element(By.NAME, "fecha_desde")
-        fecha_hasta = driver.find_element(By.NAME, "fecha_hasta")
+    # Paso 4: Parseamos el HTML para extraer la tabla
+    soup = BeautifulSoup(response.content, "html.parser")
+    table = soup.find("table", {"class": "table"})
 
-        fecha_desde.clear()
-        fecha_desde.send_keys("2010-06-01")  # Formato YYYY/MM/DD
-        fecha_hasta.clear()
-        fecha_hasta.send_keys("2025-08-04")
+    # Paso 5: Convertimos a DataFrame
+    data = []
+    for row in table.find_all("tr"):
+        cols = row.find_all("td")
+        if len(cols) >= 2:
+            fecha = cols[0].text.strip()
+            valor = cols[1].text.strip().replace(".", "").replace(",", ".")
+            try:
+                data.append({"fecha": fecha, "tipo_cambio": float(valor)})
+            except:
+                continue
 
-        consultar_btn = driver.find_element(By.NAME, "B1")
-        consultar_btn.click()
-        
-        print('pase2')
-        time.sleep(15)  
-        print('pase22')
-        print("HTML antes del wait:")
-        print(driver.page_source[:1000])  # Imprime los primeros 1000 caracteres
-
-        WebDriverWait(driver, 60).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "table.table tbody tr"))
-        )
-        print('pase3')
-        soup = BeautifulSoup(driver.page_source, "html.parser")
-        table = soup.find("table", {"class": "table"})
-        print('pase4')
-        data = []
-        for tbody in table.find_all("tbody"):
-            for row in tbody.find_all("tr"):
-                cols = row.find_all("td")
-                if len(cols) >= 2:
-                    fecha = cols[0].text.strip()
-                    valor = cols[1].text.strip().replace(".", "").replace(",", ".")
-                    try:
-                        data.append({"fecha": fecha, "tipo_cambio": float(valor)})
-                    except:
-                        continue
-        print('pase5')                    
-        df = pd.DataFrame(data)
-        df["fecha"] = pd.to_datetime(df["fecha"], dayfirst=True)
-        print(f"Filas extraídas: {len(df)}")
-        return df
-
-    finally:
-        driver.quit()
+    df = pd.DataFrame(data)
+    df["fecha"] = pd.to_datetime(df["fecha"], dayfirst=True)
+    print(df.head())
+    return df
 
 def load_to_postgres(df):
     print("Cargando datos a PostgreSQL en Render...")
