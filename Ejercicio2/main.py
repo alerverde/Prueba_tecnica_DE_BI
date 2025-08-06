@@ -23,6 +23,7 @@ def extract_dolar_bcra():
 
     # Inicializar el driver
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
     try:
         url = "https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables_datos.asp?serie=7927"
         driver.get(url)
@@ -42,6 +43,9 @@ def extract_dolar_bcra():
         consultar_btn = driver.find_element(By.NAME, "B1")
         consultar_btn.click()
         print('pase2')
+        print("HTML antes del wait:")
+        print(driver.page_source[:1000])  # Imprime los primeros 1000 caracteres
+        
         WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.CLASS_NAME, "table"))
         )
