@@ -1,5 +1,5 @@
 # Ejercicio 1 - Replicación de base de datos
-Este objetivo principal es replicar datos de una base PostgreSQL local a una base en la nube (Render) mediante un pipeline ETL automatizado.  
+El objetivo principal de este ejercicio es replicar datos de una base PostgreSQL local a una base en la nube (Render) mediante un pipeline ETL automatizado.  
 
 
 ### Esquema de la base de datos
@@ -23,14 +23,6 @@ El esquema se crea por única vez en Render con `schema.py`.
 - `load.py`: realiza el upsert (insert/update) en la base destino en Render para mantener la base espejo sincronizada.  
 - `main.py`: orquesta la extracción y carga.  
 
-### Variables de entorno
-
-- `ORIGIN_DB_URL`: conexión a la base local PostgreSQL.  
-- `DEST_DB_URL`: conexión a la base en Render.  
-
-### Automatización
-
-Se usa GitHub Actions para ejecutar `main.py` diariamente. Las credenciales sensibles se almacenan como [GitHub Secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets).  
 
 ### Cómo correr localmente
 

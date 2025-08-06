@@ -11,12 +11,6 @@ import time
 import os
 from dotenv import load_dotenv
 
-from sqlalchemy import insert
-from sqlalchemy.dialects.postgresql import insert as pg_insert  # para ON CONFLICT
-from sqlalchemy.orm import Session
-
-
-
 def extract_dolar_bcra():
     print("Extrayendo cotizaciones del BCRA...")
 
@@ -72,13 +66,10 @@ def extract_dolar_bcra():
         driver.quit()
 
 def load_to_postgres(df):
-    print("Cargando datos a PostgreSQL...")
+    print("Cargando datos a PostgreSQL en Render...")
     load_dotenv()
-    ORIGIN_DB_URL = os.getenv("ORIGIN_DB_URL")
-
-    engine = create_engine("postgresql://admin:admin123@localhost:5432/cotizaciones_db")
-
-    #engine = create_engine(ORIGIN_DB_URL, connect_args={"sslmode": "require"})
+    DEST2_DB_URL = os.getenv("DEST2_DB_URL")
+    engine = create_engine(DEST2_DB_URL, connect_args={"sslmode": "require"})
     metadata = MetaData()
 
     cotizaciones = Table(

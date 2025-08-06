@@ -23,5 +23,5 @@ jobs:
 
       - name: Run script
         env:
-          ORIGIN_DB_URL: ${{ secrets.ORIGIN_DB_URL }}
+          DEST2_DB_URL: ${{ secrets.DEST2_DB_URL }}
         run: python Ejercicio2/main.py
