@@ -24,7 +24,7 @@ def extract_dolar_bcra():
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.NAME, "fecha_desde"))
         )
-
+        print('pase1')
         fecha_desde = driver.find_element(By.NAME, "fecha_desde")
         fecha_hasta = driver.find_element(By.NAME, "fecha_hasta")
 
@@ -35,7 +35,7 @@ def extract_dolar_bcra():
 
         consultar_btn = driver.find_element(By.NAME, "B1")
         consultar_btn.click()
-
+        print('pase2')
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CLASS_NAME, "table"))
         )
@@ -43,7 +43,7 @@ def extract_dolar_bcra():
         time.sleep(3)
         soup = BeautifulSoup(driver.page_source, "html.parser")
         table = soup.find("table", {"class": "table"})
-
+        print('pase3')
         data = []
         for tbody in table.find_all("tbody"):
             for row in tbody.find_all("tr"):
@@ -55,7 +55,7 @@ def extract_dolar_bcra():
                         data.append({"fecha": fecha, "tipo_cambio": float(valor)})
                     except:
                         continue
-
+        print('pase4')                    
         df = pd.DataFrame(data)
         df["fecha"] = pd.to_datetime(df["fecha"], dayfirst=True)
         print(f"Filas extraídas: {len(df)}")
@@ -63,7 +63,7 @@ def extract_dolar_bcra():
 
     finally:
         driver.quit()
-print('pase1')
+
 def load_to_postgres(df):
     print("Cargando datos a PostgreSQL en Render...")
     DEST2_DB_URL = os.getenv("DEST2_DB_URL")
@@ -79,7 +79,7 @@ def load_to_postgres(df):
     )
 
     metadata.create_all(engine)
-    print('pase3')
+    print('pase5')
     df["moneda"] = "Dólar"
     df["fuente"] = "BCRA"
     df = df[["fecha", "moneda", "tipo_cambio", "fuente"]]
@@ -100,7 +100,8 @@ def load_to_postgres(df):
         print(f"{len(df)} filas insertadas en 'cotizaciones'.")
     else:
         print("No hay nuevas filas para insertar.")
-    print('pase4')
+    print('pase6')
+    
 if __name__ == "__main__":
     try:
         df = extract_dolar_bcra()
