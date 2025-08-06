@@ -21,6 +21,7 @@ def extract_dolar_bcra():
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
 
+
     # Inicializar el driver
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
@@ -45,14 +46,14 @@ def extract_dolar_bcra():
         print('pase2')
         print("HTML antes del wait:")
         print(driver.page_source[:1000])  # Imprime los primeros 1000 caracteres
-        
-        WebDriverWait(driver, 30).until(
-            EC.presence_of_element_located((By.CLASS_NAME, "table"))
-        )
 
+        WebDriverWait(driver, 60).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "table.table tbody tr"))
+        )
+        print('pase3')
         soup = BeautifulSoup(driver.page_source, "html.parser")
         table = soup.find("table", {"class": "table"})
-        print('pase3')
+        print('pase4')
         data = []
         for tbody in table.find_all("tbody"):
             for row in tbody.find_all("tr"):
@@ -64,7 +65,7 @@ def extract_dolar_bcra():
                         data.append({"fecha": fecha, "tipo_cambio": float(valor)})
                     except:
                         continue
-        print('pase4')                    
+        print('pase5')                    
         df = pd.DataFrame(data)
         df["fecha"] = pd.to_datetime(df["fecha"], dayfirst=True)
         print(f"Filas extraídas: {len(df)}")
@@ -78,7 +79,7 @@ def load_to_postgres(df):
     DEST2_DB_URL = os.getenv("DEST2_DB_URL")
     engine = create_engine(DEST2_DB_URL, connect_args={"sslmode": "require"})
     metadata = MetaData()
-    print('pase2')
+
     cotizaciones = Table(
         "cotizaciones", metadata,
         Column("fecha", Date, nullable=False),
