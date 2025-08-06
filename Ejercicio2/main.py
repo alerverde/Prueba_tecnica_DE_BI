@@ -1,22 +1,35 @@
 # main.py
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
 from sqlalchemy import create_engine, MetaData, Table, Column, String, Date, NUMERIC, select, func
 import pandas as pd
 from bs4 import BeautifulSoup
-import time
 import os
+
+options = Options()
+options.add_argument('--headless')
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
+
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
 def extract_dolar_bcra():
     print("Extrayendo cotizaciones del BCRA...")
 
+    # Configurar Chrome headless
     options = Options()
-    options.headless = True
-    driver = webdriver.Firefox(options=options)
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
 
+    # Inicializar el driver
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
     try:
         url = "https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables_datos.asp?serie=7927"
         driver.get(url)
@@ -40,7 +53,6 @@ def extract_dolar_bcra():
             EC.presence_of_element_located((By.CLASS_NAME, "table"))
         )
 
-        time.sleep(3)
         soup = BeautifulSoup(driver.page_source, "html.parser")
         table = soup.find("table", {"class": "table"})
         print('pase3')
@@ -101,7 +113,7 @@ def load_to_postgres(df):
     else:
         print("No hay nuevas filas para insertar.")
     print('pase6')
-    
+
 if __name__ == "__main__":
     try:
         df = extract_dolar_bcra()
