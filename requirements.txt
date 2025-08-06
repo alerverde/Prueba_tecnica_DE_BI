@@ -3,4 +3,4 @@ beautifulsoup4
 pandas
 SQLAlchemy
 psycopg2-binary
-python-dotenv
+webdriver-manager
