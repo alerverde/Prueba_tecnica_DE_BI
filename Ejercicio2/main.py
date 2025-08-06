@@ -9,7 +9,6 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import time
 import os
-from dotenv import load_dotenv
 
 def extract_dolar_bcra():
     print("Extrayendo cotizaciones del BCRA...")
@@ -64,14 +63,13 @@ def extract_dolar_bcra():
 
     finally:
         driver.quit()
-
+print('pase1')
 def load_to_postgres(df):
     print("Cargando datos a PostgreSQL en Render...")
-    load_dotenv()
     DEST2_DB_URL = os.getenv("DEST2_DB_URL")
     engine = create_engine(DEST2_DB_URL, connect_args={"sslmode": "require"})
     metadata = MetaData()
-
+    print('pase2')
     cotizaciones = Table(
         "cotizaciones", metadata,
         Column("fecha", Date, nullable=False),
@@ -81,7 +79,7 @@ def load_to_postgres(df):
     )
 
     metadata.create_all(engine)
-
+    print('pase3')
     df["moneda"] = "Dólar"
     df["fuente"] = "BCRA"
     df = df[["fecha", "moneda", "tipo_cambio", "fuente"]]
@@ -102,7 +100,7 @@ def load_to_postgres(df):
         print(f"{len(df)} filas insertadas en 'cotizaciones'.")
     else:
         print("No hay nuevas filas para insertar.")
-
+    print('pase4')
 if __name__ == "__main__":
     try:
         df = extract_dolar_bcra()
