@@ -24,4 +24,4 @@ jobs:
       - name: Run script
         env:
           ORIGIN_DB_URL: ${{ secrets.ORIGIN_DB_URL }}
-        run: python main.py
+        run: python Ejercicio2/main.py
