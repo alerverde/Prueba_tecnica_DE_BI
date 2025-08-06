@@ -45,7 +45,10 @@ def extract_dolar_bcra():
 
         consultar_btn = driver.find_element(By.NAME, "B1")
         consultar_btn.click()
+        
         print('pase2')
+        time.sleep(15)  
+        print('pase22')
         print("HTML antes del wait:")
         print(driver.page_source[:1000])  # Imprime los primeros 1000 caracteres
 

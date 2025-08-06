@@ -7,7 +7,7 @@ def scrape_terrenos_posadas():
     headers = {
         "User-Agent": "Mozilla/5.0"
     }
-
+    print('pase1')
     terrenos = []
     page = 1
 
@@ -22,7 +22,7 @@ def scrape_terrenos_posadas():
         for a in anuncios:
             if len(terrenos) >= 20:
                 break
-
+            print('pase2')
             titulo = a.find("h2", class_="posting-title").get_text(strip=True) if a.find("h2", class_="posting-title") else None
             precio = a.find("span", class_="first-price").get_text(strip=True) if a.find("span", class_="first-price") else None
             ubicacion = a.find("span", class_="posting-location").get_text(strip=True) if a.find("span", class_="posting-location") else None
@@ -35,5 +35,5 @@ def scrape_terrenos_posadas():
             })
 
         page += 1
-
+    print('pase3')
     return terrenos
