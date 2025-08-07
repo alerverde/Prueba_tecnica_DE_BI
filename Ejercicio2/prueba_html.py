@@ -7,8 +7,7 @@ import pandas as pd
 VERIFY_SSL = False
 
 # URL del formulario
-url = "https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables_datos.asp"
-
+url = "https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables_datos.asp?serie=7927"
 # Inicializar sesión para mantener cookies
 session = requests.Session()
 
@@ -22,7 +21,6 @@ soup = BeautifulSoup(response_get.content, 'html.parser')
 
 # Paso 2: POST con parámetros del formulario
 payload = {
-    "serie": "7927",  # Dólar tipo vendedor
     "fecha_desde": "01/01/2024",  # Fecha de inicio (formato dd/mm/yyyy)
     "fecha_hasta": "01/08/2025",  # Fecha de fin
     "B1": "Consultar"
