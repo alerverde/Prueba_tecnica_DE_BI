@@ -1,0 +1,15 @@
+Extrayendo tablas desde la base origen...
+
+DimDate extraída: 350 filas
+DimCustomerSegment extraída: 19 filas
+DimProduct extraída: 25 filas
+FactSales extraída: 25 filas
+
+Extracción finalizada.
+
+Iniciando pipeline ETL...
+
+Esquema en la base espejo creado o verificado.
+
+
+Pipeline ETL completado exitosamente.

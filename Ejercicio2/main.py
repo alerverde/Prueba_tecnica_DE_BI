@@ -22,14 +22,14 @@ def extract_dolar_bcra():
     try:
         url = "https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables_datos.asp?serie=7927"
         driver.get(url)
-
+        'pase1'
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.NAME, "fecha_desde"))
         )
 
         fecha_desde = driver.find_element(By.NAME, "fecha_desde")
         fecha_hasta = driver.find_element(By.NAME, "fecha_hasta")
-
+        'pase2'
         fecha_desde.clear()
         fecha_desde.send_keys("2010-06-01")  # Formato YYYY/MM/DD
         fecha_hasta.clear()
@@ -41,11 +41,11 @@ def extract_dolar_bcra():
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CLASS_NAME, "table"))
         )
-
+        'pase3'
         time.sleep(3)
         soup = BeautifulSoup(driver.page_source, "html.parser")
         table = soup.find("table", {"class": "table"})
-
+        'pase4'
         data = []
         for tbody in table.find_all("tbody"):
             for row in tbody.find_all("tr"):
