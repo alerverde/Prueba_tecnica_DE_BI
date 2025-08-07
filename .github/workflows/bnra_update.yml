@@ -36,8 +36,8 @@ jobs:
           sudo apt-get install -y xvfb
           pip install selenium beautifulsoup4 python-dotenv pandas sqlalchemy psycopg2-binary
 
-      - name: Run Python script (headless Firefox)
+      - name: Run scraper with Xvfb (headless Firefox)
         run: |
-          xvfb-run -a python main.py
+          xvfb-run -a python Ejercicio2/main.py
         env:
-          RENDER_DB_URL: ${{ secrets.RENDER_DB_URL }}
+          ORIGIN_DB_URL: ${{ secrets.ORIGIN_DB_URL }}
