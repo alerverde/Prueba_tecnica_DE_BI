@@ -1,6 +1,6 @@
 # main.py
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -12,40 +12,52 @@ import os
 from dotenv import load_dotenv
 
 def extract_dolar_bcra():
+    """
+    Extrae datos históricos de la cotización del dólar tipo vendedor desde el sitio del BCRA
+    utilizando Selenium y los convierte a un DataFrame de Pandas.
+    Returns:
+        pd.DataFrame: DataFrame con columnas ['fecha', 'tipo_cambio']
+    """
+
     print("Extrayendo cotizaciones del BCRA...")
 
     options = Options()
-    options.headless = True
-    options.binary_location = "/snap/bin/firefox" 
-    driver = webdriver.Firefox(options=options)
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    driver = webdriver.Chrome(options=options)
 
     try:
         url = "https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables_datos.asp?serie=7927"
         driver.get(url)
-        'pase1'
+
+        # Esperar a que cargue el formulario de fechas
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.NAME, "fecha_desde"))
         )
 
+        # Completar fechas de consulta
         fecha_desde = driver.find_element(By.NAME, "fecha_desde")
         fecha_hasta = driver.find_element(By.NAME, "fecha_hasta")
-        'pase2'
         fecha_desde.clear()
-        fecha_desde.send_keys("2010-06-01")  # Formato YYYY/MM/DD
+        fecha_desde.send_keys("2010-06-01")
         fecha_hasta.clear()
         fecha_hasta.send_keys("2025-08-04")
 
+        # Hacer clic en el botón Consultar
         consultar_btn = driver.find_element(By.NAME, "B1")
         consultar_btn.click()
 
+        # Esperar a que cargue la tabla de resultados
         WebDriverWait(driver, 15).until(
             EC.presence_of_element_located((By.CLASS_NAME, "table"))
         )
-        'pase3'
         time.sleep(3)
+
+        # Extraer HTML de la tabla       
         soup = BeautifulSoup(driver.page_source, "html.parser")
         table = soup.find("table", {"class": "table"})
-        'pase4'
+
         data = []
         for tbody in table.find_all("tbody"):
             for row in tbody.find_all("tr"):
@@ -57,33 +69,41 @@ def extract_dolar_bcra():
                         data.append({"fecha": fecha, "tipo_cambio": float(valor)})
                     except:
                         continue
-        print('pase1')
+
         df = pd.DataFrame(data)
         df["fecha"] = pd.to_datetime(df["fecha"], dayfirst=True)
         print(f"Filas extraídas: {len(df)}")
         return df
-        
+
     finally:
         driver.quit()
-    
 
-def load_to_postgres(df):
+def load_to_render(df):
+    """
+    Carga los datos al esquema `cotizaciones` de la base PostgreSQL en Render.
+    Realiza ingesta incremental en base a la última fecha registrada.
+
+    Args:
+        df (pd.DataFrame): DataFrame con las columnas ['fecha', 'tipo_cambio']
+    """
+
     print("Cargando datos a PostgreSQL Render...")
     load_dotenv()
-    DEST2_DB_URL = os.getenv("ORIGIN_DB_URL")
-    engine = create_engine(DEST2_DB_URL, connect_args={"sslmode": "require"})
+    RENDER_DB_URL = os.getenv("RENDER_DB_URL")
+    engine = create_engine(RENDER_DB_URL, connect_args={"sslmode": "require"})
     metadata = MetaData()
 
+    # Definición de la tabla (esquema espejo)
     cotizaciones = Table(
         "cotizaciones", metadata,
         Column("fecha", Date, nullable=False),
         Column("moneda", String(50), nullable=False),
-        Column("tipo_cambio", NUMERIC(10,4), nullable=False),
+        Column("tipo_cambio", NUMERIC(10, 4), nullable=False),
         Column("fuente", String(50), nullable=False)
     )
 
     metadata.create_all(engine)
-    print('pase2')
+
     df["moneda"] = "Dólar"
     df["fuente"] = "BCRA"
     df = df[["fecha", "moneda", "tipo_cambio", "fuente"]]
@@ -93,6 +113,7 @@ def load_to_postgres(df):
         max_fecha = result.scalar()
 
     if max_fecha:
+        max_fecha = pd.to_datetime(max_fecha)
         df = df[df["fecha"] > max_fecha]
         print(f"Ingestando incremental desde: {max_fecha.date() + pd.Timedelta(days=1)}")
     else:
@@ -106,9 +127,13 @@ def load_to_postgres(df):
         print("No hay nuevas filas para insertar.")
 
 if __name__ == "__main__":
+    """
+    Punto de entrada principal del script ETL.
+    Ejecuta la extracción y posterior carga de datos.
+    """
     try:
         df = extract_dolar_bcra()
-        load_to_postgres(df)
+        load_to_render(df)
     except Exception as e:
         print("Error general en el pipeline:")
         print(e)
