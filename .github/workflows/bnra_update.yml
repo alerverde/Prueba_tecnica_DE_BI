@@ -1,35 +1,38 @@
-name: Actualizar cotizaciones BCRA
+name: BNRA_update
 
 on:
-  schedule:
-    - cron: '0 21 * * *'  # Todos los dias 21:00 UTC
   workflow_dispatch:
+  schedule:
+    - cron: '0 10 * * 1'  # corre los lunes a las 10:00 UTC
 
 jobs:
-  run-bcra-scraper:
+  run-scraper:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Install Google Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt install -y ./google-chrome-stable_current_amd64.deb
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y firefox-esr xvfb
+          wget https://github.com/mozilla/geckodriver/releases/latest/download/geckodriver-v0.34.0-linux64.tar.gz
+          tar -xvzf geckodriver-v0.34.0-linux64.tar.gz
+          chmod +x geckodriver
+          sudo mv geckodriver /usr/local/bin/
 
-      - name: Verificar Chrome
-        run: google-chrome-stable --version
+      - name: Install Python dependencies
+        run: |
+          pip install selenium beautifulsoup4 python-dotenv pandas sqlalchemy psycopg2-binary
 
-      - name: Run script
+      - name: Run scraper with Xvfb (for headless Firefox)
+        run: |
+          xvfb-run -a python main.py
         env:
-          DEST2_DB_URL: ${{ secrets.DEST2_DB_URL }}
-        run: python Ejercicio2/main.py
+          ORIGIN_DB_URL: ${{ secrets.RENDER_DB_URL }}

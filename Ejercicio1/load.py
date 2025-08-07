@@ -8,7 +8,7 @@ from sqlalchemy import insert
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 load_dotenv()
-RENDER_DB_URL = os.getenv("ORIGIN_DB_URL")
+RENDER_DB_URL = os.getenv("RENDER_DB_URL")
 engine = get_engine(RENDER_DB_URL)
 
 def upsert_from_df(engine, table, df, id_column):
