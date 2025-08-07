@@ -1,4 +1,4 @@
-name: Run Selenium with Firefox
+name: BNRA Update
 
 on:
   workflow_dispatch:
@@ -21,7 +21,6 @@ jobs:
       - name: Install Firefox via Snap
         run: |
           sudo snap install firefox
-          sudo ln -s /snap/bin/firefox /usr/bin/firefox
 
       - name: Install Geckodriver manually
         run: |
