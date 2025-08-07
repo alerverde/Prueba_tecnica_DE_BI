@@ -5,12 +5,22 @@ Contenido
 
 ### Ingesta incremental 
 
-El script `main.py` tiene dos funciones: extract_dolar_bcra y load_to_postgres. La función extract_dolar_brca navega a la página del BCRA con cotizaciones del dólar. Extrae datos desde la fecha 2010-06-01 hasta la fecha 2025-08-04. Limpia y procesa los datos en un DataFrame de pandas. La función load_to_postgres carga los datos nuevos en PostgreSQL. Si no hay datos previos (en Render Postgres) ingesta todos los valores de la tabla y si ya hay datos solo incresa los posteriores a la última fecha.
+main.py
+
+Este script realiza un pipeline ETL automatizado para extraer la cotización del dólar (tipo vendedor) desde el sitio del BCRA, procesar los datos y cargarlos en una base de datos PostgreSQL alojada en Render.
+
+El proceso consta de:
+1. Extracción mediante Selenium de la tabla HTML de cotizaciones desde el sitio web oficial del BCRA.
+2. Transformación de los datos en un DataFrame de Pandas con formato limpio.
+3. Carga incremental en la tabla `cotizaciones` en la base espejo en la nube (Render), evitando duplicados.
+
 
 ### Automatización
 
-1. Crear esquema en Render con `python3 schema.py` por unica vez.  
-2. Ejecutar pipeline con `python3 main.py` y/o automatizar con Github actions.
+NOTA: En este caso la opción de preferencia hubiese sido Github Actions, pero la configuración de los drives de Firefox y el acceso a la web desde el running de Github no la pude configurar a pesar de varios intentos. Seria una opcion pasar a Chrome.
+El .yml se ve as
 
-### Automatización
-Acceso a través de 
+
+Por lo detallado anteriormente opté por un cronjob configurado es:
+
+0 0 * * * /usr/bin/python3 /ruta/completa/a/Ejercicio2/main.py >> /ruta/completa/a/Ejercicio2/logs/bnra_update.log 2>&1
