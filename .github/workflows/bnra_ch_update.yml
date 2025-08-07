@@ -1,39 +1,51 @@
-name: Ejecutar Scraper de Propiedades
+name: Run Web Scraper
 
 on:
   push:
     branches:
-      - main  # o tu rama principal
+      - main
+  workflow_dispatch:
 
 jobs:
   scrape:
     runs-on: ubuntu-20.04
-    steps:
-      - name: Clonar el repositorio
-        uses: actions/checkout@v4
 
-      - name: Instalar dependencias del sistema
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip curl python3 python3-pip xvfb libxi6 libgconf-2-4 libnss3 libxss1 libappindicator1 libindicator7 fonts-liberation libu2f-udev
+          sudo apt-get install -y \
+            wget unzip curl python3 python3-pip xvfb \
+            libxi6 libgconf-2-4 libnss3 libxss1 \
+            libappindicator1 libindicator7 \
+            fonts-liberation libu2f-udev
 
-      - name: Instalar Google Chrome v116.0.5845.96
+      - name: Install Google Chrome
         run: |
-          wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_116.0.5845.96-1_amd64.deb
-          sudo dpkg -i google-chrome-stable_116.0.5845.96-1_amd64.deb || sudo apt-get -f install -y
-          google-chrome --version
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -f install -y
 
-      - name: Instalar ChromeDriver v116.0.5845.96
+      - name: Install ChromeDriver
         run: |
-          wget https://storage.googleapis.com/chrome-for-testing-public/116.0.5845.96/linux64/chromedriver-linux64.zip
-          unzip chromedriver-linux64.zip
-          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
-          chromedriver --version
+          CHROME_VERSION=$(google-chrome --version | grep -oP '\d+\.\d+\.\d+')
+          CHROMEDRIVER_VERSION=$(wget -qO- "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION}")
+          wget "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
 
-      - name: Instalar dependencias de Python
+      - name: Install Python packages
         run: |
           pip install -r requirements.txt
 
-      - name: Ejecutar el script de scraping
+      - name: Run scraper
         run: |
-          python Ejercicio2/main.py
+          xvfb-run python3 tu_script.py
