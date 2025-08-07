@@ -18,16 +18,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Instalar Google Chrome 138.0.7204.168 y ChromeDriver 138.0.7240.0
+      - name: Instalar Google Chrome 138.0.7204.168
         run: |
-          # Instalar Chrome
           wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_138.0.7204.168-1_amd64.deb
           sudo dpkg -i google-chrome-stable_138.0.7204.168-1_amd64.deb || sudo apt-get -f install -y
 
-          # Instalar ChromeDriver
-          wget https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/138.0.7240.0/linux64/chromedriver-linux64.zip
+      - name: Instalar ChromeDriver 138.0.7240.0
+        run: |
+          wget https://storage.googleapis.com/chrome-for-testing-public/138.0.7240.0/linux64/chromedriver-linux64.zip
           unzip chromedriver-linux64.zip
-          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver
+          sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
           rm -rf chromedriver-linux64*
 
