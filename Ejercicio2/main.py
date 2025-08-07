@@ -16,6 +16,7 @@ def extract_dolar_bcra():
 
     options = Options()
     options.headless = True
+    options.binary_location = "/snap/bin/firefox" 
     driver = webdriver.Firefox(options=options)
 
     try:

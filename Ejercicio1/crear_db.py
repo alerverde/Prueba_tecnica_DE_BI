@@ -13,29 +13,43 @@ from schema import DimDate, DimCustomerSegment, DimProduct, FactSales
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # carga variables desde .env al entorno
+# Cargar variables de entorno y establecer conexión con la base de datos
+load_dotenv()
 ORIGIN_DB_URL = os.getenv("ORIGIN_DB_URL")
-
 engine = get_engine(ORIGIN_DB_URL)
+
+# Crear tablas si no existen
 try:
     metadata.create_all(engine)
     print("Tablas creadas correctamente.")
 except Exception as e:
     print(f"Error creando las tablas: {e}")
 
-# inserta registros nuevos o actualiza si hubo modificaciones
+# Insertamos registros nuevos o actualiza si hubo modificaciones
 def upsert_from_csv(engine, table, csv_path, pk_column):
+    """
+    Inserta datos desde un archivo CSV en una tabla de la base de datos.
+    Si el registro ya existe (según clave primaria), se actualiza.
+    Args:
+        engine (sqlalchemy.Engine): Conexión a la base de datos
+        table (sqlalchemy.Table): Tabla objetivo
+        csv_path (str): Ruta al archivo CSV
+        pk_column (str): Nombre de la columna de clave primaria
+    """
     try:
+        # Leer y limpiar el CSV
         df = pd.read_csv(csv_path)
-        df = df.where(pd.notnull(df), None)
-
+        df = df.where(pd.notnull(df), None) # Reemplaza NaNs por None para PostgreSQL
+        
+        # Filtra columnas válidas según la tabla        
         table_columns = set(c.name for c in table.columns)
         df = df[[col for col in df.columns if col in table_columns]]
 
         with Session(engine) as session:
             for _, row in df.iterrows():
                 stmt = pg_insert(table).values(**row.to_dict())
-
+                
+                # Prepara actualización si hay conflicto de PK
                 update_cols = {
                     c.name: stmt.excluded[c.name]
                     for c in table.columns
@@ -53,6 +67,7 @@ def upsert_from_csv(engine, table, csv_path, pk_column):
     except Exception as e:
         print(f"Error al cargar datos en la tabla {table.name} desde {csv_path}: {e}")
 
+# Lista de tablas a cargar
 tables_info = [
     (DimDate, "tablas/DimDate.csv", "dateid"),
     (DimCustomerSegment, "tablas/DimCustomerSegment.csv", "Segmentid"),
@@ -60,6 +75,7 @@ tables_info = [
     (FactSales, "tablas/FactSales.csv", "Salesid"),
 ]
 
+# Ejecutar la carga para cada tabla ---
 for table, csv_path, pk in tables_info:
     try:
         upsert_from_csv(engine, table, csv_path, pk)

@@ -5,8 +5,10 @@ from sqlalchemy import (
 )
 from sqlalchemy import create_engine
 
-# modelo
+# Metadata global que agrupa todas las definiciones de tablas
 metadata = MetaData()
+
+
 DimDate = Table(
     "DimDate", metadata,
     Column("dateid", Integer, primary_key=True),
@@ -43,8 +45,17 @@ FactSales = Table(
     Column("QuantitySold", Integer, nullable=False),
 )
 
-# creamos las tabblas
 def get_engine(db_url: str, ssl_required: bool = False):
+    """
+    Crea y devuelve un motor de conexión SQLAlchemy.
+
+    Args:
+        db_url (str): URL de conexión a la base de datos.
+        ssl_required (bool): Indica si se debe usar SSL (por defecto False).
+
+    Returns:
+        sqlalchemy.engine.Engine: motor de conexión configurado.
+    """
     if ssl_required:
         return create_engine(db_url, connect_args={"sslmode": "require"})
     return create_engine(db_url)

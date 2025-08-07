@@ -1,5 +1,5 @@
 # Ejercicio 1 - Replicación de base de datos
-El objetivo principal de este ejercicio es replicar datos de una base PostgreSQL local a una base en la nube (Render) mediante un pipeline ETL automatizado.  
+El objetivo principal de este ejercicio es replicar datos de una base PostgreSQL local a una base en la nube (Render) mediante un pipeline ETL automatizado.
 
 ### Esquema de la base de datos
 
