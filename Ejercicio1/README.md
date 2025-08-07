@@ -21,10 +21,15 @@ Los datos de origen están almacenados en archivos CSV dentro de la carpeta `/ta
 ### Cómo correr localmente
 
 1. Levantar un contenedor PostgreSQL local con Docker.
-2. Crear base de datos localmente `python3 crear_db.py` (unica vcez). 
-3. Ejecutar pipeline con `python3 main.py` y/o automatizar con Github actions.  
+2. Crear base de datos localmente `python3 crear_db.py` (única vez). 
+3. Para la automatización, se creó un cronjob local, ya que GitHub Actions no puede acceder a la base de datos local (localhost) directamente y exponerla (por ejemplo, con ngrok) no era viable ni requerido en la consigna.
+
+El cronjob configurado es:
+
+0 0 * * * /usr/bin/python3 /ruta/completa/a/Ejercicio1/main.py >> /ruta/completa/a/Ejercicio1/logs/etl.log 2>&1
+
+Esto ejecutará el script main.py ubicado en la carpeta Ejercicio1 todos los días a la medianoche (00:00 hs). La salida estándar y los errores se guardarán en el archivo etl.log dentro de la misma carpeta Ejercicio1/logs/.
+Nota: La carpeta logs debe existir previamente para que el archivo de log pueda ser creado correctamente.
 
 ### Cómo acceder a la base espejo
-
-
-
+Esta disponible en https://dashboard.render.com/d/dpg-d28ahbbipnbc739hcfg0-a

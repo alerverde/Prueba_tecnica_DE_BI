@@ -9,6 +9,7 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import time
 import os
+from dotenv import load_dotenv
 
 def extract_dolar_bcra():
     print("Extrayendo cotizaciones del BCRA...")
@@ -60,13 +61,15 @@ def extract_dolar_bcra():
         df["fecha"] = pd.to_datetime(df["fecha"], dayfirst=True)
         print(f"Filas extraídas: {len(df)}")
         return df
-
+        print('pase1')
     finally:
         driver.quit()
+    
 
 def load_to_postgres(df):
     print("Cargando datos a PostgreSQL Render...")
-
+    load_dotenv()
+    DEST2_DB_URL = os.getenv("ORIGIN_DB_URL")
     engine = create_engine(DEST2_DB_URL, connect_args={"sslmode": "require"})
     metadata = MetaData()
 
@@ -79,7 +82,7 @@ def load_to_postgres(df):
     )
 
     metadata.create_all(engine)
-
+    print('pase2')
     df["moneda"] = "Dólar"
     df["fuente"] = "BCRA"
     df = df[["fecha", "moneda", "tipo_cambio", "fuente"]]
