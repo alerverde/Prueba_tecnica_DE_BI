@@ -16,8 +16,8 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Install requests
-        run: pip install requests
+      - name: Install requirements
+        run: pip install -r requirements.txt
       
       - name: Run BCRA requests test
         run: python Ejercicio2/prueba_html.py
