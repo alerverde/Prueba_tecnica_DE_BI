@@ -1,11 +1,14 @@
 # load.py
+import os
+from dotenv import load_dotenv
 from schema import DimDate, DimCustomerSegment, DimProduct, FactSales
+from schema import get_engine
 from sqlalchemy.orm import Session
 from sqlalchemy import insert
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
-from schema import get_engine
-
+load_dotenv()
+RENDER_DB_URL = os.getenv("ORIGIN_DB_URL")
 engine = get_engine(RENDER_DB_URL)
 
 def upsert_from_df(engine, table, df, id_column):
