@@ -7,51 +7,23 @@ from sqlalchemy import insert
 from sqlalchemy.dialects.postgresql import insert as pg_insert  # para ON CONFLICT
 from sqlalchemy.orm import Session
 
-engine = create_engine("postgresql://admin:admin123@localhost:5432/ventas_db")
-metadata = MetaData()
+from schema import metadata
+from schema import get_engine
+from schema import DimDate, DimCustomerSegment, DimProduct, FactSales
+import os
+from dotenv import load_dotenv
 
-fechas = Table(
-    "DimDate", metadata,
-    Column("dateid", Integer, primary_key=True),
-    Column("date", Date, nullable=False),
-    Column("Year", Integer, nullable=False),
-    Column("Quarter", Integer, nullable=False),
-    Column("QuarterName", String(50), nullable=False),
-    Column("Month", Integer, nullable=False),
-    Column("Monthname", String(50), nullable=False),    
-    Column("Day", Integer, nullable=False),
-    Column("Weekday", Integer, nullable=False),
-    Column("WeekdayName", String(50), nullable=False)
-)
+load_dotenv()  # carga variables desde .env al entorno
+ORIGIN_DB_URL = os.getenv("ORIGIN_DB_URL")
 
-customer_segment = Table(
-    "DimCustomerSegment", metadata,
-    Column("Segmentid", Integer, primary_key=True),
-    Column("City", String(50), nullable=False)
-)
-
-productos = Table(
-    "DimProduct", metadata,
-    Column("Productid", Integer, primary_key=True),
-    Column("Producttype", String(100), nullable=False)
-)
-
-ventas = Table(
-    "FactSales", metadata,
-    Column("Salesid", String(100), primary_key=True),
-    Column("Dateid", Integer, ForeignKey("DimDate.dateid"), nullable=False),
-    Column("Productid", Integer, ForeignKey("DimProduct.Productid"), nullable=False),
-    Column("Segmentid", Integer, ForeignKey("DimCustomerSegment.Segmentid"), nullable=False),
-    Column("Price_PerUnit", Float, nullable=False),
-    Column("QuantitySold", Integer, nullable=False),
-)
-
+engine = get_engine(ORIGIN_DB_URL)
 try:
     metadata.create_all(engine)
     print("Tablas creadas correctamente.")
 except Exception as e:
     print(f"Error creando las tablas: {e}")
 
+# inserta registros nuevos o actualiza si hubo modificaciones
 def upsert_from_csv(engine, table, csv_path, pk_column):
     try:
         df = pd.read_csv(csv_path)
@@ -82,10 +54,10 @@ def upsert_from_csv(engine, table, csv_path, pk_column):
         print(f"Error al cargar datos en la tabla {table.name} desde {csv_path}: {e}")
 
 tables_info = [
-    (fechas, "tablas/DimDate.csv", "dateid"),
-    (customer_segment, "tablas/DimCustomerSegment.csv", "Segmentid"),
-    (productos, "tablas/DimProduct.csv", "Productid"),
-    (ventas, "tablas/FactSales.csv", "Salesid"),
+    (DimDate, "tablas/DimDate.csv", "dateid"),
+    (DimCustomerSegment, "tablas/DimCustomerSegment.csv", "Segmentid"),
+    (DimProduct, "tablas/DimProduct.csv", "Productid"),
+    (FactSales, "tablas/FactSales.csv", "Salesid"),
 ]
 
 for table, csv_path, pk in tables_info:

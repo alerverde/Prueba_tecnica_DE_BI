@@ -1,12 +1,6 @@
 # extract.py
 from sqlalchemy import create_engine
 import pandas as pd
-import os
-from dotenv import load_dotenv
-
-load_dotenv()  # carga variables desde .env al entorno
-
-ORIGIN_DB_URL = os.getenv("ORIGIN_DB_URL")
 
 # Crear el motor de conexión
 engine = create_engine(ORIGIN_DB_URL)

@@ -3,13 +3,10 @@ from schema import DimDate, DimCustomerSegment, DimProduct, FactSales
 from sqlalchemy.orm import Session
 from sqlalchemy import insert
 from sqlalchemy.dialects.postgresql import insert as pg_insert
-from sqlalchemy import create_engine
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
-DEST_DB_URL = os.getenv("DEST_DB_URL")
-engine = create_engine(DEST_DB_URL)
+from schema import get_engine
+
+engine = get_engine(RENDER_DB_URL)
 
 def upsert_from_df(engine, table, df, id_column):
     with engine.begin() as connection:

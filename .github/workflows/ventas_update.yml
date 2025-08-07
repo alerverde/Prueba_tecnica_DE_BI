@@ -1,9 +1,13 @@
-name: Ejecutar ETL diario
+name: Update Ventas
 
 on:
   schedule:
     - cron: '0 2 * * *'  # Todos los días a las 2 AM UTC
-  workflow_dispatch:
+  workflow_dispatch:  # Permite ejecución manual desde GitHub UI
+  push:
+    branches:
+      - main
+
   
 jobs:
   etl_job:
@@ -24,5 +28,5 @@ jobs:
     - name: Ejecutar main.py
       env:
         ORIGIN_DB_URL: ${{ secrets.ORIGIN_DB_URL }}
-        DEST_DB_URL: ${{ secrets.DEST_DB_URL }}
+        DEST_DB_URL: ${{ secrets.RENDER_DB_URL }}
       run: python main.py
