@@ -56,12 +56,12 @@ def extract_dolar_bcra():
                         data.append({"fecha": fecha, "tipo_cambio": float(valor)})
                     except:
                         continue
-
+        print('pase1')
         df = pd.DataFrame(data)
         df["fecha"] = pd.to_datetime(df["fecha"], dayfirst=True)
         print(f"Filas extraídas: {len(df)}")
         return df
-        print('pase1')
+        
     finally:
         driver.quit()
     

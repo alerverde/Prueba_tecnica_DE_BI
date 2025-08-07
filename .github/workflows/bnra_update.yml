@@ -1,16 +1,16 @@
-name: BNRA_update
+name: Run Selenium with Firefox
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 10 * * 1'  # corre los lunes a las 10:00 UTC
+    - cron: '0 10 * * 1'  # Lunes 10:00 UTC
 
 jobs:
-  run-scraper:
+  run:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -18,21 +18,27 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install system dependencies
+      - name: Install Firefox via Snap
         run: |
-          sudo apt-get update
-          sudo apt-get install -y firefox-esr xvfb
-          wget https://github.com/mozilla/geckodriver/releases/latest/download/geckodriver-v0.34.0-linux64.tar.gz
-          tar -xvzf geckodriver-v0.34.0-linux64.tar.gz
+          sudo snap install firefox
+          sudo ln -s /snap/bin/firefox /usr/bin/firefox
+
+      - name: Install Geckodriver manually
+        run: |
+          GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f4)
+          wget https://github.com/mozilla/geckodriver/releases/download/$GECKO_VERSION/geckodriver-$GECKO_VERSION-linux64.tar.gz
+          tar -xvzf geckodriver-*.tar.gz
           chmod +x geckodriver
           sudo mv geckodriver /usr/local/bin/
 
-      - name: Install Python dependencies
+      - name: Install Xvfb and Python dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
           pip install selenium beautifulsoup4 python-dotenv pandas sqlalchemy psycopg2-binary
 
-      - name: Run scraper with Xvfb (for headless Firefox)
+      - name: Run Python script (headless Firefox)
         run: |
           xvfb-run -a python main.py
         env:
-          ORIGIN_DB_URL: ${{ secrets.RENDER_DB_URL }}
+          RENDER_DB_URL: ${{ secrets.RENDER_DB_URL }}
