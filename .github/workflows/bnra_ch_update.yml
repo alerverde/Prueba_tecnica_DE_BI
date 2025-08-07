@@ -16,7 +16,7 @@ jobs:
       - name: Instalar dependencias de Python
         run: |
           python -m pip install --upgrade pip
-          pip install -r Ejercicio2/requirements.txt
+          pip install -r requirements.txt
 
       - name: Instalar Google Chrome 138 y ChromeDriver compatible
         run: |
