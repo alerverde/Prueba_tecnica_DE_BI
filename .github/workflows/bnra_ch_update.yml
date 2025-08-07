@@ -16,14 +16,17 @@ jobs:
       - name: Instalar dependencias de Python
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r Ejercicio2/requirements.txt
 
-      - name: Instalar Google Chrome 138 y ChromeDriver 138
+      - name: Instalar Google Chrome 138 y ChromeDriver compatible
         run: |
           wget https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_138.0.7204.168-1_amd64.deb
           sudo dpkg -i google-chrome-stable_138.0.7204.168-1_amd64.deb || sudo apt-get -f install -y
 
-          wget https://chromedriver.storage.googleapis.com/138.0.7204.168/chromedriver_linux64.zip
+          CHROMEDRIVER_VERSION=$(curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE_138)
+          echo "Versión ChromeDriver compatible: $CHROMEDRIVER_VERSION"
+
+          wget https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip
           unzip chromedriver_linux64.zip
           sudo mv chromedriver /usr/local/bin/
           chmod +x /usr/local/bin/chromedriver
