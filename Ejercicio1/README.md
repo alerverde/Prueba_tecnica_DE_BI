@@ -10,11 +10,7 @@ El objetivo principal de este ejercicio es replicar datos de una base PostgreSQL
 
 ### Datos de origen
 
-Los datos de origen están almacenados en archivos CSV dentro de la carpeta `/tablas`. Estos datos se cargan en la base local inicialmente con `crear_db.py`.
-
-### Base de datos en Render
-
-El esquema se crea por única vez en Render con `schema.py`.
+Los datos de origen están almacenados en archivos CSV dentro de la carpeta `/tablas`. Estos datos se cargan en la base local inicialmente con `crear_db.py`. El esquema se encuentra en `schema.py` y desde ahi se importa a `crear_db.py` y `load.py`.
 
 ### Pipeline ETL
 
@@ -24,11 +20,11 @@ El esquema se crea por única vez en Render con `schema.py`.
 
 ### Cómo correr localmente
 
-1. Levantar contenedor PostgreSQL local con Docker.
-2. Crear base de datos localmente `python3 crear_db.py`. 
-2. Crear esquema en Render con `python3 schema.py`.  
+1. Levantar un contenedor PostgreSQL local con Docker.
+2. Crear base de datos localmente `python3 crear_db.py` (unica vcez). 
 3. Ejecutar pipeline con `python3 main.py` y/o automatizar con Github actions.  
 
 ### Cómo acceder a la base espejo
+
 
 
