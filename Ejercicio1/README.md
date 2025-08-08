@@ -28,7 +28,7 @@ El cronjob configurado es:
 
 0 0 * * * /usr/bin/python3 /ruta/completa/a/Ejercicio1/main.py >> /ruta/completa/a/Ejercicio1/logs/etl.log 2>&1
 
-Esto ejecutará el script main.py ubicado en la carpeta Ejercicio1 todos los días a la medianoche (00:00 hs). La salida estándar y los errores se guardarán en el archivo etl.log dentro de la misma carpeta Ejercicio1/logs/.
+Esto ejecutará el script `main.py` ubicado en la carpeta Ejercicio1 todos los días a la medianoche (00:00 hs). La salida estándar y los errores se guardarán en el archivo etl.log dentro de la misma carpeta Ejercicio1/logs/.
 Nota: La carpeta logs debe existir previamente para que el archivo de log pueda ser creado correctamente.
 
 ### Cómo acceder a la base espejo

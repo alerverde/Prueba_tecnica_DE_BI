@@ -1,48 +1,41 @@
 name: BNRA Update
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: '0 10 * * 1'  # Lunes 10:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
-  run:
-    runs-on: ubuntu-latest
+  scrape:
+    runs-on: ubuntu-20.04
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      - name: Install Firefox via Snap
-        run: |
-          sudo snap install firefox
-
-      - name: Install Geckodriver manually
-        run: |
-          GECKO_VERSION=$(curl -s https://api.github.com/repos/mozilla/geckodriver/releases/latest | grep tag_name | cut -d '"' -f4)
-          wget https://github.com/mozilla/geckodriver/releases/download/$GECKO_VERSION/geckodriver-$GECKO_VERSION-linux64.tar.gz
-          tar -xvzf geckodriver-*.tar.gz
-          chmod +x geckodriver
-          sudo mv geckodriver /usr/local/bin/
-
-      - name: Install Xvfb and Python dependencies
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb
-          pip install selenium beautifulsoup4 python-dotenv pandas sqlalchemy psycopg2-binary
+          sudo apt-get install -y \
+            firefox-esr xvfb python3-pip wget unzip curl
 
-      - name: Print Firefox location
+      - name: Install GeckoDriver
         run: |
-          which firefox
-          firefox --version
+          GECKO_VERSION="v0.33.0"
+          wget https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz
+          tar -xzf geckodriver-${GECKO_VERSION}-linux64.tar.gz
+          sudo mv geckodriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/geckodriver
 
-      - name: Run scraper with Xvfb (headless Firefox)
+      - name: Install Python packages
         run: |
-          xvfb-run -a python Ejercicio2/main.py
-        env:
-          ORIGIN_DB_URL: ${{ secrets.ORIGIN_DB_URL }}
+          pip install -r requirements.txt
+
+      - name: Run scraper
+        run: |
+          xvfb-run python3 tu_script.py

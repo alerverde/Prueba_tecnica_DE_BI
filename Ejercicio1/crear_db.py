@@ -75,7 +75,7 @@ tables_info = [
     (FactSales, "tablas/FactSales.csv", "Salesid"),
 ]
 
-# Ejecutar la carga para cada tabla ---
+# Ejecutar la carga para cada tabla
 for table, csv_path, pk in tables_info:
     try:
         upsert_from_csv(engine, table, csv_path, pk)

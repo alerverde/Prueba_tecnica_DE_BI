@@ -8,7 +8,6 @@ from sqlalchemy import create_engine
 # Metadata global que agrupa todas las definiciones de tablas
 metadata = MetaData()
 
-
 DimDate = Table(
     "DimDate", metadata,
     Column("dateid", Integer, primary_key=True),
