@@ -1,4 +1,4 @@
-# Ejercicio 1 -Extracción incremental desde API externa (BCRA)
+# Ejercicio 2 -Extracción incremental desde API externa (BCRA)
 
 En este ejercicio se automatiza la extracción de cotizaciones del dólar tipo vendedor desde la página oficial del Banco Central de la República Argentina (BCRA) mediante web scraping con Selenium, y luego se cargan los datos en una base de datos PostgreSQL alojada en Render.
 
